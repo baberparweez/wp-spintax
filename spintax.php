@@ -13,9 +13,9 @@
  * @package           Spintax
  *
  * @wordpress-plugin
- * Plugin Name:       Spintax HQ
+ * Plugin Name:       Spintax
  * Plugin URI:        -
- * Description:       This is a short description of what the plugin does. It's displayed in the WordPress admin area.
+ * Description:       This is a small WordPress plugin used to 'spin' through alternative words on page reload.
  * Version:           1.0.0
  * Author:            Baber Parweez
  * Author URI:        -
