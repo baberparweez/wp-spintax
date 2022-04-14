@@ -67,8 +67,8 @@ class Spintax {
 	 * @since    1.0.0
 	 */
 	public function __construct() {
-		if ( defined( 'Spintax_VERSION' ) ) {
-			$this->version = Spintax_VERSION;
+		if ( defined( 'SPINTAX_VERSION' ) ) {
+			$this->version = SPINTAX_VERSION;
 		} else {
 			$this->version = '1.0.0';
 		}
@@ -156,7 +156,7 @@ class Spintax {
 
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
-		
+
 	}
 
 	/**
