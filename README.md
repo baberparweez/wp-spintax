@@ -1,0 +1,2 @@
+# spintax
+WordPress Spintax splugin
