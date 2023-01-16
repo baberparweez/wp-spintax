@@ -100,6 +100,11 @@ class Spintax_Public {
 
 	}
 
+	/**
+	 * Adds the spintax functionality to text editors
+	 *
+	 * @return null
+	 */
 	public function spintax() {
 		// Pass in the string you'd for which you'd like a random output
 		function random($str) {
@@ -116,6 +121,43 @@ class Spintax_Public {
 		}
 		
 		add_filter('the_content', 'random');
+	}
+
+	/**
+	 * Adds the dynamic spintax functionality to text editors
+	 *
+	 * @return null
+	 */
+	public function js_spintax() {
+		function js_random($str) {
+			$content = preg_replace_callback("/~(.*?)~/", function ($match) {
+				
+				$words = explode("|", $match[1]);
+				$span = '<span class="spintax">' . $words[0] . '</span>';
+				?>
+				<script type="text/javascript">
+					var spintaxArr = <?php echo json_encode($words); ?>;
+					var i = 0;
+					var fadeSpeed = 250;
+					if (spintaxArr) {
+						(function($) {
+							$(".spintax").html(spintaxArr[i]).fadeIn(fadeSpeed);
+							setInterval(function() {
+								i = (i + 1) % spintaxArr.length;
+								$(".spintax").fadeOut(fadeSpeed, function() {
+									$(this).html(spintaxArr[i]).fadeIn(fadeSpeed);
+								});
+							}, 1500);
+						}(jQuery));
+					}
+				</script>
+				<?php return $span;
+			}, $str);
+
+			return $content;
+		}
+		
+		add_filter('the_content', 'js_random');
 	}
 
 }
