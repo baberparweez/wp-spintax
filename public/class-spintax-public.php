@@ -142,7 +142,7 @@ class Spintax_Public {
 	public function js_spintax() {
 		function js_random($str)
 		{
-			// Returns random values found between { this | and }
+			// Returns random values found between ~ this | and ~
 			$content = preg_replace_callback("/~(.*?)~/", function ($match) {
 				// Splits 'foo|bar' strings into an array
 				$words = explode("|", $match[1]);
