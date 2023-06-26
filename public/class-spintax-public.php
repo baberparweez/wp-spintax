@@ -155,7 +155,7 @@ class Spintax_Public {
 			ob_start();
 			?>
 			<script type="text/javascript">
-				var fadeSpeed = 250;
+				var fadeSpeed = 350;
 				jQuery('.spintax').each(function() {
 					var spintaxElement = jQuery(this);
 					var spintaxArr = spintaxElement.text().split('|');
@@ -168,7 +168,7 @@ class Spintax_Public {
 						spintaxElement.fadeOut(fadeSpeed, function() {
 							spintaxElement.html(spintaxArr[i]).fadeIn(fadeSpeed);
 						});
-					}, 1500);
+					}, 2500);
 				});
 			</script>
 			<?php
