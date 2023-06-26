@@ -120,7 +120,18 @@ class Spintax_Public {
 			return $content;
 		}
 		
+		// Apply spintax filter to necessary hooks for text editors
 		add_filter('the_content', 'random');
+		add_filter('widget_text_content', 'random'); // Apply to text widgets
+		add_filter('widget_text_content', 'do_shortcode'); // Allow shortcodes in text widgets
+		add_filter('acf_the_content', 'random'); // Apply to Advanced Custom Fields content
+		// Add more editor-specific hooks here if needed
+
+		// Apply spintax filter to WYSIWYG editor
+		add_filter('tiny_mce_before_init', function ($init_array) {
+			$init_array['setup'] .= 'ed.onSetContent.add(function(ed, o) { tinymce.activeEditor.setContent(random(tinymce.activeEditor.getContent())); });';
+			return $init_array;
+		});
 	}
 
 	/**
@@ -129,35 +140,54 @@ class Spintax_Public {
 	 * @return null
 	 */
 	public function js_spintax() {
-		function js_random($str) {
+		function js_random($str)
+		{
+			// Returns random values found between { this | and }
 			$content = preg_replace_callback("/~(.*?)~/", function ($match) {
-				
+				// Splits 'foo|bar' strings into an array
 				$words = explode("|", $match[1]);
-				$span = '<span class="spintax">' . $words[0] . '</span>';
-				?>
-				<script type="text/javascript">
-					var spintaxArr = <?php echo json_encode($words); ?>;
-					var i = 0;
-					var fadeSpeed = 250;
-					if (spintaxArr) {
-						(function($) {
-							$(".spintax").html(spintaxArr[i]).fadeIn(fadeSpeed);
-							setInterval(function() {
-								i = (i + 1) % spintaxArr.length;
-								$(".spintax").fadeOut(fadeSpeed, function() {
-									$(this).html(spintaxArr[i]).fadeIn(fadeSpeed);
-								});
-							}, 1500);
-						}(jQuery));
-					}
-				</script>
-				<?php return $span;
+				// Grabs a random array entry and returns it
+				$span = '<span class="spintax">' . implode('|', $words) . '</span>';
+				return $span;
+				// The input string, which you provide when calling this func
 			}, $str);
 
-			return $content;
+			ob_start();
+			?>
+			<script type="text/javascript">
+				var fadeSpeed = 250;
+				jQuery('.spintax').each(function() {
+					var spintaxElement = jQuery(this);
+					var spintaxArr = spintaxElement.text().split('|');
+					var i = 0;
+
+					spintaxElement.html(spintaxArr[i]).fadeIn(fadeSpeed);
+
+					setInterval(function() {
+						i = (i + 1) % spintaxArr.length;
+						spintaxElement.fadeOut(fadeSpeed, function() {
+							spintaxElement.html(spintaxArr[i]).fadeIn(fadeSpeed);
+						});
+					}, 1500);
+				});
+			</script>
+			<?php
+
+			$script = ob_get_clean();
+			return $content . $script;
 		}
 		
+		// Apply spintax filter to necessary hooks for text editors
 		add_filter('the_content', 'js_random');
-	}
+		add_filter('widget_text_content', 'js_random'); // Apply to text widgets
+		add_filter('widget_text_content', 'do_shortcode'); // Allow shortcodes in text widgets
+		add_filter('acf_the_content', 'js_random'); // Apply to Advanced Custom Fields content
+		// Add more editor-specific hooks here if needed
 
+		// Apply spintax filter to WYSIWYG editor
+		add_filter('tiny_mce_before_init', function ($init_array) {
+			$init_array['setup'] .= 'ed.onSetContent.add(function(ed, o) { tinymce.activeEditor.setContent(js_random(tinymce.activeEditor.getContent())); });';
+			return $init_array;
+		});
+	}
 }
