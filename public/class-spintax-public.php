@@ -147,7 +147,7 @@ class Spintax_Public {
 				// Splits 'foo|bar' strings into an array
 				$words = explode("|", $match[1]);
 				// Grabs a random array entry and returns it
-				$span = '<span class="spintax">' . implode('|', $words) . '</span>';
+				$span = '<span class="spintax">' . $words[0] . '<noscript>' . implode('|', $words) . '</noscript></span>';
 				return $span;
 				// The input string, which you provide when calling this func
 			}, $str);
@@ -158,7 +158,8 @@ class Spintax_Public {
 				var fadeSpeed = 350;
 				jQuery('.spintax').each(function() {
 					var spintaxElement = jQuery(this);
-					var spintaxArr = spintaxElement.text().split('|');
+					var fullSpintax = spintaxElement.find('noscript').text();
+					var spintaxArr = fullSpintax.split('|');
 					var i = 0;
 
 					spintaxElement.html(spintaxArr[i]).fadeIn(fadeSpeed);
