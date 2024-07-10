@@ -20,7 +20,8 @@
  * @subpackage Spintax/public
  * @author     Baber Parweez <baberparweez@gmail.com>
  */
-class Spintax_Public {
+class Spintax_Public
+{
 
 	/**
 	 * The ID of this plugin.
@@ -47,11 +48,11 @@ class Spintax_Public {
 	 * @param      string    $plugin_name       The name of the plugin.
 	 * @param      string    $version    The version of this plugin.
 	 */
-	public function __construct( $plugin_name, $version ) {
+	public function __construct($plugin_name, $version)
+	{
 
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
-
 	}
 
 	/**
@@ -59,7 +60,8 @@ class Spintax_Public {
 	 *
 	 * @since    1.0.0
 	 */
-	public function enqueue_styles() {
+	public function enqueue_styles()
+	{
 
 		/**
 		 * This function is provided for demonstration purposes only.
@@ -73,8 +75,7 @@ class Spintax_Public {
 		 * class.
 		 */
 
-		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/spintax-public.css', array(), $this->version, 'all' );
-
+		wp_enqueue_style($this->plugin_name, plugin_dir_url(__FILE__) . 'css/spintax-public.css', array(), $this->version, 'all');
 	}
 
 	/**
@@ -82,7 +83,8 @@ class Spintax_Public {
 	 *
 	 * @since    1.0.0
 	 */
-	public function enqueue_scripts() {
+	public function enqueue_scripts()
+	{
 
 		/**
 		 * This function is provided for demonstration purposes only.
@@ -96,8 +98,7 @@ class Spintax_Public {
 		 * class.
 		 */
 
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/spintax-public.js', array( 'jquery' ), $this->version, false );
-
+		wp_enqueue_script($this->plugin_name, plugin_dir_url(__FILE__) . 'js/spintax-public.js', array('jquery'), $this->version, false);
 	}
 
 	/**
@@ -105,32 +106,30 @@ class Spintax_Public {
 	 *
 	 * @return null
 	 */
-	public function spintax() {
+	public function spintax()
+	{
 		// Pass in the string you'd for which you'd like a random output
-		function random($str) {
+		function random($str)
+		{
 			// Returns random values found between { this | and }
 			$content = preg_replace_callback("/{(.*?)}/", function ($match) {
 				// Splits 'foo|bar' strings into an array
 				$words = explode("|", $match[1]);
 				// Grabs a random array entry and returns it
 				return $words[array_rand($words)];
-			// The input string, which you provide when calling this func
+				// The input string, which you provide when calling this func
 			}, $str);
 
 			return $content;
 		}
-		
-		// Apply spintax filter to necessary hooks for text editors
-		add_filter('the_content', 'random');
-		add_filter('widget_text_content', 'random'); // Apply to text widgets
-		add_filter('widget_text_content', 'do_shortcode'); // Allow shortcodes in text widgets
-		add_filter('acf_the_content', 'random'); // Apply to Advanced Custom Fields content
-		// Add more editor-specific hooks here if needed
 
-		// Apply spintax filter to WYSIWYG editor
-		add_filter('tiny_mce_before_init', function ($init_array) {
-			$init_array['setup'] .= 'ed.onSetContent.add(function(ed, o) { tinymce.activeEditor.setContent(random(tinymce.activeEditor.getContent())); });';
-			return $init_array;
+		// Apply spintax filter to body text using buffer
+		ob_start(function ($buffer) {
+			// Use regex to only target the body content
+			$pattern = '/<body[^>]*>(.*?)<\/body>/is';
+			return preg_replace_callback($pattern, function ($matches) {
+				return '<body>' . random($matches[1]) . '</body>';
+			}, $buffer);
 		});
 	}
 
@@ -139,56 +138,52 @@ class Spintax_Public {
 	 *
 	 * @return null
 	 */
-	public function js_spintax() {
+	public function js_spintax()
+	{
 		function js_random($str)
 		{
-			// Returns random values found between ~ this | and ~
 			$content = preg_replace_callback("/~(.*?)~/", function ($match) {
-				// Splits 'foo|bar' strings into an array
 				$words = explode("|", $match[1]);
-				// Grabs a random array entry and returns it
 				$span = '<span class="spintax">' . $words[0] . '<noscript>' . implode('|', $words) . '</noscript></span>';
 				return $span;
-				// The input string, which you provide when calling this func
 			}, $str);
 
-			ob_start();
-			?>
+			return $content;
+		}
+
+		// Apply spintax filter to body text using buffer
+		ob_start(function ($buffer) {
+			// Use regex to only target the body content
+			$pattern = '/<body[^>]*>(.*?)<\/body>/is';
+			return preg_replace_callback($pattern, function ($matches) {
+				return '<body>' . js_random($matches[1]) . '</body>';
+			}, $buffer);
+		});
+
+		// Add JavaScript to handle the dynamic spintax replacement
+		add_action('wp_footer', function () {
+?>
 			<script type="text/javascript">
-				var fadeSpeed = 350;
-				jQuery('.spintax').each(function() {
-					var spintaxElement = jQuery(this);
-					var fullSpintax = spintaxElement.find('noscript').text();
-					var spintaxArr = fullSpintax.split('|');
-					var i = 0;
+				jQuery(document).ready(function($) {
+					var fadeSpeed = 350;
+					$('.spintax').each(function() {
+						var spintaxElement = $(this);
+						var fullSpintax = spintaxElement.find('noscript').text();
+						var spintaxArr = fullSpintax.split('|');
+						var i = 0;
 
-					spintaxElement.html(spintaxArr[i]).fadeIn(fadeSpeed);
+						spintaxElement.html(spintaxArr[i]).fadeIn(fadeSpeed);
 
-					setInterval(function() {
-						i = (i + 1) % spintaxArr.length;
-						spintaxElement.fadeOut(fadeSpeed, function() {
-							spintaxElement.html(spintaxArr[i]).fadeIn(fadeSpeed);
-						});
-					}, 2500);
+						setInterval(function() {
+							i = (i + 1) % spintaxArr.length;
+							spintaxElement.fadeOut(fadeSpeed, function() {
+								spintaxElement.html(spintaxArr[i]).fadeIn(fadeSpeed);
+							});
+						}, 2500);
+					});
 				});
 			</script>
-			<?php
-
-			$script = ob_get_clean();
-			return $content . $script;
-		}
-		
-		// Apply spintax filter to necessary hooks for text editors
-		add_filter('the_content', 'js_random');
-		add_filter('widget_text_content', 'js_random'); // Apply to text widgets
-		add_filter('widget_text_content', 'do_shortcode'); // Allow shortcodes in text widgets
-		add_filter('acf_the_content', 'js_random'); // Apply to Advanced Custom Fields content
-		// Add more editor-specific hooks here if needed
-
-		// Apply spintax filter to WYSIWYG editor
-		add_filter('tiny_mce_before_init', function ($init_array) {
-			$init_array['setup'] .= 'ed.onSetContent.add(function(ed, o) { tinymce.activeEditor.setContent(js_random(tinymce.activeEditor.getContent())); });';
-			return $init_array;
+<?php
 		});
 	}
 }
