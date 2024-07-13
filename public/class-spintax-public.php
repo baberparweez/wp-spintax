@@ -123,14 +123,16 @@ class Spintax_Public
 			return $content;
 		}
 
-		// Apply spintax filter to body text using buffer
-		ob_start(function ($buffer) {
-			// Use regex to only target the body content
-			$pattern = '/<body[^>]*>(.*?)<\/body>/is';
-			return preg_replace_callback($pattern, function ($matches) {
-				return '<body>' . random($matches[1]) . '</body>';
-			}, $buffer);
-		});
+		// Apply spintax filter to body text using buffer if not in admin or builder context
+		if (!is_admin() && !defined('DOING_AJAX')) {
+			ob_start(function ($buffer) {
+				// Use regex to only target the body content
+				$pattern = '/<body[^>]*>(.*?)<\/body>/is';
+				return preg_replace_callback($pattern, function ($matches) {
+					return '<body>' . random($matches[1]) . '</body>';
+				}, $buffer);
+			});
+		}
 	}
 
 	/**
@@ -152,38 +154,40 @@ class Spintax_Public
 		}
 
 		// Apply spintax filter to body text using buffer
-		ob_start(function ($buffer) {
-			// Use regex to only target the body content
-			$pattern = '/<body[^>]*>(.*?)<\/body>/is';
-			return preg_replace_callback($pattern, function ($matches) {
-				return '<body>' . js_random($matches[1]) . '</body>';
-			}, $buffer);
-		});
+		if (!is_admin() && !defined('DOING_AJAX')) {
+			ob_start(function ($buffer) {
+				// Use regex to only target the body content
+				$pattern = '/<body[^>]*>(.*?)<\/body>/is';
+				return preg_replace_callback($pattern, function ($matches) {
+					return '<body>' . js_random($matches[1]) . '</body>';
+				}, $buffer);
+			});
 
-		// Add JavaScript to handle the dynamic spintax replacement
-		add_action('wp_footer', function () {
+			// Add JavaScript to handle the dynamic spintax replacement
+			add_action('wp_footer', function () {
 ?>
-			<script type="text/javascript">
-				jQuery(document).ready(function($) {
-					var fadeSpeed = 350;
-					$('.spintax').each(function() {
-						var spintaxElement = $(this);
-						var fullSpintax = spintaxElement.find('noscript').text();
-						var spintaxArr = fullSpintax.split('|');
-						var i = 0;
+				<script type="text/javascript">
+					jQuery(document).ready(function($) {
+						var fadeSpeed = 350;
+						$('.spintax').each(function() {
+							var spintaxElement = $(this);
+							var fullSpintax = spintaxElement.find('noscript').text();
+							var spintaxArr = fullSpintax.split('|');
+							var i = 0;
 
-						spintaxElement.html(spintaxArr[i]).fadeIn(fadeSpeed);
+							spintaxElement.html(spintaxArr[i]).fadeIn(fadeSpeed);
 
-						setInterval(function() {
-							i = (i + 1) % spintaxArr.length;
-							spintaxElement.fadeOut(fadeSpeed, function() {
-								spintaxElement.html(spintaxArr[i]).fadeIn(fadeSpeed);
-							});
-						}, 2500);
+							setInterval(function() {
+								i = (i + 1) % spintaxArr.length;
+								spintaxElement.fadeOut(fadeSpeed, function() {
+									spintaxElement.html(spintaxArr[i]).fadeIn(fadeSpeed);
+								});
+							}, 2500);
+						});
 					});
-				});
-			</script>
+				</script>
 <?php
-		});
+			});
+		}
 	}
 }
