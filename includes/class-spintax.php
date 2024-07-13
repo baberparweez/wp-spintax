@@ -174,8 +174,8 @@ class Spintax
 
 		$this->loader->add_action('wp_enqueue_scripts', $plugin_public, 'enqueue_styles');
 		$this->loader->add_action('wp_enqueue_scripts', $plugin_public, 'enqueue_scripts');
-		$this->loader->add_action('wp_enqueue_scripts', $plugin_public, 'spintax');
-		$this->loader->add_action('wp_enqueue_scripts', $plugin_public, 'js_spintax');
+		// $this->loader->add_action('wp_enqueue_scripts', $plugin_public, 'spintax');
+		// $this->loader->add_action('wp_enqueue_scripts', $plugin_public, 'js_spintax');
 	}
 
 	/**
